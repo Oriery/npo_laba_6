@@ -6,11 +6,11 @@ let driver
 
 before(async () => {
     driver = await new Builder().forBrowser("chrome").build()
-    await driver.manage().setTimeouts({ implicit: 5000 })
+    await driver.manage().setTimeouts({ implicit: 10000 })
 })
 
 describe("Bank", async function () {
-    this.timeout(10000)
+    this.timeout(20000)
 
     beforeEach(async () => {
         await driver.get(
@@ -40,7 +40,6 @@ describe("Bank", async function () {
         await driver
             .findElement(By.css('[ng-model="amount"]'))
             .sendKeys("123", Key.RETURN)
-        await driver.findElement(By.css(".btn-default")).click()
         
         let el = await driver.findElement(By.css("strong + strong"))
         expect(await el.getText()).to.eql("123")
@@ -53,7 +52,6 @@ describe("Bank", async function () {
         await driver
             .findElement(By.css('[ng-model="amount"]'))
             .sendKeys("500000", Key.RETURN)
-        await driver.findElement(By.css(".btn-default")).click()
         
         let el = await driver.findElement(By.css(".error"))
         expect(await el.getText()).to.not.include('successful')
@@ -66,13 +64,11 @@ describe("Bank", async function () {
         await driver
             .findElement(By.css('[ng-model="amount"]'))
             .sendKeys("5", Key.RETURN)
-        await driver.findElement(By.css(".btn-default")).click()
 
         await driver.findElement(By.css('button[ng-click="withdrawl()"]')).click()
         await driver
             .findElement(By.css('[ng-model="amount"]'))
             .sendKeys("3", Key.RETURN)
-        await driver.findElement(By.css(".btn-default")).click()
         
         let el = await driver.findElement(By.css(".error"))
         expect(await el.getText()).to.include('successful')
@@ -80,38 +76,36 @@ describe("Bank", async function () {
         expect(await el.getText()).to.eql("2")
     })
 
-    it("should correctly count balance after transactions", async function () {
+    it("should correctly save history of transactions", async function () {
         await driver.findElement(By.css('option[label="1004"]')).click()
 
         await driver.findElement(By.css('button[ng-click="deposit()"]')).click()
         await driver
             .findElement(By.css('[ng-model="amount"]'))
             .sendKeys("5", Key.RETURN)
-        await driver.findElement(By.css(".btn-default")).click()
+        await sleep(2000)
 
         await driver.findElement(By.css('button[ng-click="withdrawl()"]')).click()
         await driver
             .findElement(By.css('[ng-model="amount"]'))
             .sendKeys("3", Key.RETURN)
-        await driver.findElement(By.css(".btn-default")).click()
-        
-        let el = await driver.findElement(By.css(".error"))
+        await sleep(2000)
+
+        el = await driver.findElement(By.css(".error"))
         expect(await el.getText()).to.include('successful')
         el = await driver.findElement(By.css("strong + strong"))
         expect(await el.getText()).to.eql("2")
 
-        it("should correctly save history of transactions", async function () {
-            await driver.findElement(By.css('button[ng-click="transactions()"]')).click()
-            
-            let el = await driver.findElement(By.css("#anchor0:nth-child(2)"))
-            expect(await el.getText()).to.eql("5")
-            el = await driver.findElement(By.css("#anchor1:nth-child(2)"))
-            expect(await el.getText()).to.eql("3")
-            el = await driver.findElement(By.css("#anchor0:nth-child(3)"))
-            expect(await el.getText()).to.eql("Debit")
-            el = await driver.findElement(By.css("#anchor1:nth-child(3)"))
-            expect(await el.getText()).to.eql("Credit")
-        })
+        await driver.findElement(By.css('button[ng-click="transactions()"]')).click()
+
+        el = await driver.findElements(By.css("#anchor0 > td"))
+        expect(await el[1].getText()).to.eql("5")
+        el = await driver.findElements(By.css("#anchor1 > td"))
+        expect(await el[1].getText()).to.eql("3")
+        el = await driver.findElements(By.css("#anchor0 > td"))
+        expect(await el[2].getText()).to.eql("Credit")
+        el = await driver.findElements(By.css("#anchor1 > td"))
+        expect(await el[2].getText()).to.eql("Debit")
     })
 })
 
