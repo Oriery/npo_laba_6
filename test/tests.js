@@ -9,22 +9,6 @@ before(async () => {
     await driver.manage().setTimeouts({ implicit: 5000 })
 })
 
-describe.skip("Google", function () {
-    this.timeout(30000)
-
-    it("google works", async function () {
-        var searchString = "Automation testing with Selenium"
-
-        await driver.get("http://google.com")
-        await driver
-            .findElement(By.name("q"))
-            .sendKeys(searchString, Key.RETURN)
-
-        var title = await driver.getTitle()
-        return expect(title).to.include(searchString)
-    })
-})
-
 describe("Bank", async function () {
     this.timeout(10000)
 
